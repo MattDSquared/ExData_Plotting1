@@ -64,7 +64,6 @@ devid <- dev.cur()
 with(subset(DT, plotidx), 
      plot(datetime, global_active_power, 
           type="l",
-          ylim=c(0,6),
           xlab="",
           ylab="Global Active Power (kilowatts)"))
 dev.copy(png, file="plot2.png")

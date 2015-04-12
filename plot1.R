@@ -32,28 +32,40 @@ if (!exists("DT")) {
                    na.strings="?", 
                    stringsAsFactors=FALSE)
     
+    # all lower case is easier to type
+    names(DT) <- tolower(names(DT))
+    
     # FIXME: if this errors, there may be problems re-running this code 
     message("Cleaning data file")
     # note: time zone must be specified otherwise, when daylight savings time
     # occurs, R treats rollover as na value
-    DT$DateTime <- strptime(paste(DT$Date,DT$Time,sep=" "), 
+    DT$datetime <- strptime(paste(DT$date,DT$time,sep=" "), 
                             format="%d/%m/%Y %H:%M:%S",
                             tz="GMT")
     if (exists("subDT")) rm(subDT)
 }else {
     message("using previously loaded and cleaned data")
 }
-
-# extract sub data for all of days 2007-02-01 and 2007-02-02
-if (!exists("subDT")) {
-    message("extracting dates")
-    tstart <- as.POSIXct("2007-02-01 00:00:00")
-    tend <- as.POSIXct("2007-02-03 00:00:00")
-    subDT <- DT[(DT$DateTime >= tstart) & (DT$DateTime < tend),]
-}else {
-    message("using previously extracted dates")
-}
-# IMPORTANT: do not modify DT or subDT below this point, 
+# IMPORTANT: do not modify DT below this point, 
 # unexpected behavior may occur
 
 ## =========== Generate plot =========== 
+
+# extract sub data for all of days 2007-02-01 and 2007-02-02
+message("extracting dates")
+tstart <- as.POSIXct("2007-02-01 00:00:00",tz="GMT")
+tend <- as.POSIXct("2007-02-03 00:00:00",tz="GMT")
+plotidx <- (DT$datetime >= tstart) & (DT$datetime < tend)
+
+# open window
+PPI <- 96 # pixels per inch
+windows(width=480/PPI, height=480/PPI, xpinch=PPI, ypinch=PPI)
+devid <- dev.cur()
+with(subset(DT, plotidx), hist(global_active_power, 
+                               xlim=c(0,6),
+                               ylim=c(0,1200),
+                               col="red", 
+                               xlab="Global Active Power (kilowatts)", 
+                               main="Global Active Power"))
+dev.copy(png, file="plot1.png")
+dev.off()
